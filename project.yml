@@ -1,0 +1,44 @@
+name: YihanApp
+options:
+  bundleIdPrefix: com.yihan
+  deploymentTarget:
+    iOS: "12.0"
+  developmentLanguage: zh-Hans
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGNING_ALLOWED: NO
+    CODE_SIGNING_REQUIRED: NO
+
+targets:
+  YihanApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "12.0"
+    sources:
+      - path: YihanApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yihan.webnav
+        PRODUCT_NAME: YihanApp
+    info:
+      path: YihanApp/Info.plist
+      properties:
+        CFBundleDisplayName: "奕涵导航"
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+        LSRequiresIPhoneOS: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIViewControllerBasedStatusBarAppearance: true
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+          NSAllowsArbitraryLoadsInWebContent: true
