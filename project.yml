@@ -39,6 +39,8 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         UIViewControllerBasedStatusBarAppearance: true
+        # 无 Storyboard 启动屏时必须声明全屏，消除 "launch storyboard must be provided" 警告
+        UIRequiresFullScreen: true
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
           NSAllowsArbitraryLoadsInWebContent: true

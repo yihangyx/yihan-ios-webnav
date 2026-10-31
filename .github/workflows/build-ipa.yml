@@ -5,6 +5,10 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+# 允许内置 GITHUB_TOKEN 把 IPA 发布到 Releases
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Unsigned IPA (iOS 12+)
@@ -25,8 +29,17 @@ jobs:
           name: YihanApp-iOS12-unsigned-ipa
           path: YihanApp.ipa
 
-      - name: Publish Release on Tag
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Publish latest IPA to Releases (直链 .ipa，无外层 zip)
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: latest
+          name: latest-build
+          body: |
+            未签名 IPA（arm64，最低 iOS 12.0，可用于 iPhone 5s）。
+            下载 YihanApp.ipa 后用 Sideloadly / AltStore 以 Apple ID 自签安装。
           files: YihanApp.ipa
+          overwrite_files: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

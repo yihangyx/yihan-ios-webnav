@@ -51,20 +51,34 @@ private let supportEmail = "yihan@example.com" // 改成你的邮箱
 
 ## 云端编译 IPA（GitHub Actions）
 
-1. 推送代码到 `main` / `master` 分支，或在仓库页面 **Actions → build-ios-ipa → Run workflow** 手动触发。
-2. 任务完成后，在对应运行记录底部 **Artifacts** 下载 `YihanApp-iOS12-unsigned-ipa`，解压得到 `YihanApp.ipa`。
-3. 打 tag（如 `git tag v1.0.0 && git push origin v1.0.0`）会自动创建 Release 并附上 IPA。
+推送代码到 `main`，或在 **Actions → build-ios-ipa → Run workflow** 手动触发，约 1 分钟出包。
 
-### 安装到 iPhone 5s
+### 下载 IPA（两个渠道，注意区别）
 
-云端 runner 没有苹果开发者证书，产出的是**未签名 IPA**，不能直接安装，需用自签工具签名：
+1. **Releases（推荐，拿到的就是 `.ipa` 本体）**：仓库首页右侧 **Releases → latest-build → 下载 `YihanApp.ipa`**，无需二次解压。
+2. **Actions Artifacts（外层套了 zip，必须先解压）**：某次运行记录底部 **Artifacts** 下载的 `YihanApp-iOS12-unsigned-ipa.zip` 是压缩包，**先解压，里面的 `YihanApp.ipa` 才是安装包**；直接把这个外层 zip 拖进安装工具会报"安装包不完整/格式错误"。
 
-- **Sideloadly**（Windows / macOS）：用免费 Apple ID 签名，7 天有效，到期重签。
-- **AltStore**：类似原理，后台刷新保活。
-- 若有付费开发者账号（$99/年），在 Actions Secrets 中放证书和描述文件即可签名出正式 IPA。
+打包脚本内置结构自检：Info.plist、主二进制、Frameworks、PkgInfo 缺一即编译失败退出，不会产出残缺包。
+
+### 安装到 iPhone 5s（iOS 12.5.7）
+
+云端 runner 没有苹果开发者证书，产出的是**未签名 IPA**，iOS 不允许未签名程序直接安装，必须先用自签工具签名：
+
+- **Sideloadly（Windows 首选）**
+  1. iPhone 用数据线连电脑，手机上点"信任此电脑"；
+  2. 打开 Sideloadly，拖入 `YihanApp.ipa`（不是外层 zip）；
+  3. 填 Apple ID（免费账号即可，需要开 App 专用密码/直接在工具内登录），点 Start；
+  4. 安装后到 **设置 → 通用 → VPN与设备管理** 信任该开发者证书；
+  5. 免费账号签名 7 天有效，到期重新用 Sideloadly 刷一次。
+- **AltStore**：类似原理，可后台保活续期，适合长期用。
+- **付费开发者账号（$99/年）**：把证书 .p12 和描述文件放进仓库 Secrets，脚本加 `codesign` 步骤即可出可直接安装的正式 IPA。
+
+> 若安装工具提示"安装包不完整/已损坏/无法安装"，按顺序排查：①是否误把 Actions 外层 zip 当 IPA；②IPA 是否完整下载（Releases 直链文件应约 15 MB）；③是否经过 Sideloadly 等工具签名（未签名无法直装）。
 
 ## iOS 12 兼容性说明
 
 - 未使用 SwiftUI（iOS 13+）、未使用 SF Symbols（iOS 13+）、未使用 SceneDelegate（iOS 13+）。
-- 全部使用传统 UIKit 组件与老版本 API，最低支持 iOS 12.0，适配 iPhone 5s。
+- 全部使用传统 UIKit 组件与老版本 API，`MinimumOSVersion = 12.0`、架构 arm64，适配 iPhone 5s。
+- `UIRequiresFullScreen = true`，无需 LaunchStoryboard 也能通过启动配置校验。
+- Swift 运行时 dylib（libswiftCore 等 13 个）已内嵌进 `Frameworks/`，iOS 12 系统无内置 Swift 库也能运行。
 - `Info.plist` 已开启 WebView 任意加载（NSAllowsArbitraryLoadsInWebContent），避免 http 站点打不开。
